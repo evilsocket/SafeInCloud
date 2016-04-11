@@ -22,9 +22,31 @@ import xmltodict
 
 from sic.decrypter import Decrypter
 
+def matches( query, card ):
+    if query is None:
+        return True
+
+    query = query.lower()
+    if query in card['@title'].lower():
+        return True
+
+    for field in card['field']:
+        if query in field['@name'].lower():
+            return True
+
+        if '#text' in field and query in field['#text'].lower():
+            return True
+
+    return False
+
 if len(sys.argv) < 2:
-    print "Usage: %s DATABASE" % sys.argv[0]
+    print "Usage: %s DATABASE (search word)" % sys.argv[0]
     exit()
+
+if len(sys.argv) == 3:
+    search = sys.argv[2]
+else:
+    search = None
 
 database = sys.argv[1]
 password = getpass.getpass()
@@ -36,8 +58,10 @@ db = Decrypter( database, password )
 data = db.decrypt()
 doc = xmltodict.parse(data)
 
+print "\n"
+
 for card in doc['database']['card']:
-    if 'label_id' in card:
+    if 'label_id' in card and matches( search, card ) :
         title = card['@title']
         print "%s :" % title
         for field in card['field']:
