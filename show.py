@@ -23,19 +23,22 @@ import xmltodict
 from sic.decrypter import Decrypter
 
 def matches( query, card ):
-    if query is None:
-        return True
-
-    query = query.lower()
-    if query in card['@title'].lower():
-        return True
-
-    for field in card['field']:
-        if query in field['@name'].lower():
+    try:
+        if query is None:
             return True
 
-        if '#text' in field and query in field['#text'].lower():
+        query = query.lower()
+        if query in card['@title'].lower():
             return True
+
+        for field in card['field']:
+            if query in field['@name'].lower():
+                return True
+
+            if '#text' in field and query in field['#text'].lower():
+                return True
+    except:
+        pass
 
     return False
 
