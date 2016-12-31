@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # This file is part of SafeInCloud database manipulation project.
 #
 # Copyright(c) 2016 Simone Margaritelli
@@ -17,6 +18,8 @@
 # or write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 import sys
+import os
+from os.path import expanduser
 import getpass
 import xmltodict
 
@@ -42,32 +45,38 @@ def matches( query, card ):
 
     return False
 
-if len(sys.argv) < 2:
-    print "Usage: %s DATABASE (search word)" % sys.argv[0]
-    exit()
-
-if len(sys.argv) == 3:
-    search = sys.argv[2]
+if len(sys.argv) == 2:
+    search = sys.argv[1]
 else:
     search = None
 
-database = sys.argv[1]
+config_file = os.path.join( expanduser("~"), '.sic' )
+if not os.path.isfile(config_file):
+    ok = False
+    while ok is False:
+        db_path = raw_input( "Configuration file not found, please enter the path of your SiC database: " )
+        if not os.path.isfile(db_path):
+            print "%s does not exist!" % db_path
+        else:
+            ok = True
+
+    with open( config_file, 'w+t' ) as fd:
+        fd.write( db_path )
+else:
+    with open( config_file, 'rt' ) as fd:
+        db_path = fd.read().strip()
+
 password = getpass.getpass()
 
-if len(sys.argv) == 2:
-    database = sys.argv[1]
-
-db = Decrypter( database, password )
+db = Decrypter( db_path, password )
 data = db.decrypt()
 doc = xmltodict.parse(data)
 
-print "\n"
-
 for card in doc['database']['card']:
-    if 'label_id' in card and matches( search, card ) :
+    if matches( search, card ) :
         title = card['@title']
         print "%s :" % title
         for field in card['field']:
-            if '#text' in field:
+            if '#text' in field and '@name' in field:
                 print "  %s: %s" % ( field['@name'], field['#text'] )
         print

@@ -1,0 +1,4 @@
+clear && \
+sudo rm -rf build sic.egg-info dist && \
+python setup.py build && \
+sudo python setup.py install

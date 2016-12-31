@@ -1,0 +1,5 @@
+exclude *.pyc .DS_Store .gitignore MANIFEST.in
+include setup.py
+include README.md
+recursive-include bin *
+recursive-include sic *.py
