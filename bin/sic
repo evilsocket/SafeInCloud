@@ -22,6 +22,7 @@ import os
 from os.path import expanduser
 import getpass
 import xmltodict
+from termcolor import colored
 
 from sic.decrypter import Decrypter
 
@@ -75,8 +76,8 @@ doc = xmltodict.parse(data)
 for card in doc['database']['card']:
     if matches( search, card ) :
         title = card['@title']
-        print "%s :" % title
+        print colored( "%s\n" % title, 'green', attrs=['bold'] )
         for field in card['field']:
             if '#text' in field and '@name' in field:
-                print "  %s: %s" % ( field['@name'], field['#text'] )
+                print "%-25s: %s" % ( colored( field['@name'], 'grey', attrs=['bold'] ), field['#text'] )
         print
