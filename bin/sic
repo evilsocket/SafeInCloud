@@ -21,10 +21,11 @@ import sys
 import os
 from os.path import expanduser
 import getpass
-import xmltodict
 from termcolor import colored
 
+from xml.dom.minidom import parseString
 from sic.decrypter import Decrypter
+from sic.entry import Entry
 
 def matches( query, card ):
     try:
@@ -70,14 +71,29 @@ else:
 password = getpass.getpass()
 
 db = Decrypter( db_path, password )
-data = db.decrypt()
-doc = xmltodict.parse(data)
+entries = []
+xml = db.decrypt()
+xml = parseString(xml)
 
-for card in doc['database']['card']:
-    if matches( search, card ) :
-        title = card['@title']
-        print colored( "%s\n" % title, 'green', attrs=['bold'] )
-        for field in card['field']:
-            if '#text' in field and '@name' in field:
-                print "%-25s: %s" % ( colored( field['@name'], 'grey', attrs=['bold'] ), field['#text'] )
+for node in xml.getElementsByTagName('card'):
+    is_template = False
+    if node.hasAttribute('template'):
+        is_template = ( node.attributes['template'].value == 'true' )
+
+    if not is_template:
+        entries.append( Entry(node) )
+
+for entry in entries:
+    if entry.matches(search):
+        notes = None
+        print colored( "%s\n" % entry.title, 'green', attrs=['bold'] )
+        for title, field in entry.fields.iteritems():
+            if field.type == 'notes':
+                notes = field
+            else:
+                print "%-25s: %s" % ( colored( title, 'grey', attrs=['bold'] ), field.value )
+
+        if notes is not None:
+            print "%-25s:\n\n%s" % ( colored( 'Notes', 'grey', attrs=['bold'] ), notes.value )
+
         print
