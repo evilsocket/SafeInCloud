@@ -36,12 +36,12 @@ def matches( query, card ):
         if query in card['@title'].lower():
             return True
 
-        for field in card['field']:
-            if query in field['@name'].lower():
-                return True
+        # for field in card['field']:
+        #     if query in field['@name'].lower():
+        #         return True
 
-            if '#text' in field and query in field['#text'].lower():
-                return True
+        #     if '#text' in field and query in field['#text'].lower():
+        #         return True
     except:
         pass
 

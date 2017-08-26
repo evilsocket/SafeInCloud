@@ -57,12 +57,5 @@ class Entry:
         if query in self.title.lower():
             return True
 
-        for title, field in self.fields.iteritems():
-            if field.type != 'password':
-                if query in title.lower():
-                    return True
-                elif query in field.value.lower():
-                    return True
-
         return False
 
